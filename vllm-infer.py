@@ -90,9 +90,9 @@ if __name__ == "__main__":
             for k in range(len(samples)):
                 samples[k]['pairs'] = get_pairs(results[k])
                 fdo.write(json.dumps(samples[k], ensure_ascii=False) + "\n")
-                fdl.write(f"\n{'*'*10} BEGIN PROMPT {'*'*40}\n{prompts[k]}\n")
-                fdl.write(f"\n{'*'*10} BEGIN RESULT {'*'*40}\n{results[k]}\n")
-                fdl.write(f"\n{'*'*10} BEGIN PARSED {'*'*40}\n{json.dumps(samples[k], ensure_ascii=False, indent=2)}\n")
+                fdl.write(f"\n{'*'*10} BEGIN PROMPT {'*'*70}\n{prompts[k]}\n")
+                fdl.write(f"\n{'*'*10} BEGIN RESULT {'*'*70}\n{results[k]}\n")
+                fdl.write(f"\n{'*'*10} BEGIN PARSED {'*'*70}\n{json.dumps(samples[k], ensure_ascii=False, indent=2)}\n")
             fdo.flush()
             fdl.flush()
 
