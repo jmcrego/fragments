@@ -3,6 +3,13 @@ import json
 import argparse
 from difflib import SequenceMatcher
 
+class splitPunctuation():
+    def __init__(self):
+        self.pretok = Whitespace()
+
+    def __call__(self, text):
+        return self.pretok.pre_tokenize_str(text)
+
 
 # -----------------------------
 # Tokenization
@@ -158,10 +165,15 @@ def format_units(units):
 # Main Function
 # -----------------------------
 def get_spans_from_files(input_file, source_file, target_file, output_file, min_tok_len=1, min_str_len=3, max_gap=6):
+    sp = splitPunctuation()
     with open(input_file, encoding="utf-8") as fi, open(output_file, encoding="utf-8") as fo, open(source_file, encoding="utf-8") as fs, open(target_file, encoding="utf-8") as ft:
         for idx, (i, o, s, t) in enumerate(zip(fi, fo, fs, ft)):
-            i_tokens = tokenize(i.strip())
-            s_tokens = tokenize(s.strip())
+            i_with_offsets = sp(i.strip())
+            s_with_offsets = sp(s.strip())
+            i_tokens = [token for token, _ in i_with_offsets]
+            s_tokens = [token for token, _ in s_with_offsets]
+            # i_tokens = tokenize(i.strip())
+            # s_tokens = tokenize(s.strip())
             if len(i_tokens) and len(s_tokens) and len(o.strip()) and len(t.strip()):
                 alignment = lcs_alignment(i_tokens, s_tokens)
                 contiguous = build_maximal_spans(alignment)
