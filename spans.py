@@ -75,6 +75,10 @@ def get_spans_from_files(input_file, source_file, target_file, output_file, min_
                         "output": o.strip(),
                         "spans": [span.strip() for span in source_spans]
                     }
+                else:
+                    print(f"Warning: No spans found for sample {idx} (input and source have no common spans of at least {min_tok_len} tokens and {min_str_len} characters).", file=sys.stderr)
+            else:
+                print(f"Warning: No spans found for sample {idx} (input or source is empty after tokenization).", file=sys.stderr)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script to run inference of EuroLLM models using vLLM.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
