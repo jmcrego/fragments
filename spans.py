@@ -31,9 +31,9 @@ def get_overlapping_spans(input_tokens, source_tokens, min_tok_len=1, min_str_le
     stoks = source_tokens if not lc else [x.lower() for x in source_tokens] #['the', 'day', 'is', 'rainy']
     max_tok_len = min(len(stoks),len(itoks))
     i_spans = extract_ngrams_with_position(itoks, min_tok_len, max_tok_len) #{('the', 'day', 'is'): 0, ...}
-    print(f"i_spans: {i_spans.keys()}")
+#    print(f"i_spans: {i_spans.keys()}")
     s_spans = extract_ngrams_with_position(stoks, min_tok_len, max_tok_len) #{('the', 'day', 'is'): 0, ...}
-    print(f"s_spans: {s_spans.keys()}")
+#    print(f"s_spans: {s_spans.keys()}")
     common_spans = set(s_spans.keys()) & set(i_spans.keys()) #('the', 'day', 'is')
     print(f"common_spans: {common_spans}")
 
