@@ -71,12 +71,10 @@ def spans_to_units(spans, source_tokens):
 # -----------------------------
 # Expand spans with gappy units
 # -----------------------------
-def build_gappy_units(units, max_gap=4):
+def merge_nearby_units(units, max_gap=6):
     """
-    Merge non-adjacent units into gappy spans.
-
-    If two spans are close enough (gap <= max_gap),
-    merge them into a single gappy unit.
+    Merge units if they are close enough.
+    No gap tokens are inserted.
     """
 
     if not units:
@@ -84,24 +82,27 @@ def build_gappy_units(units, max_gap=4):
 
     units = sorted(units, key=lambda x: x["indices"][0])
 
-    gappy = []
+    merged = []
     current = units[0]
 
-    for next_unit in units[1:]:
+    for nxt in units[1:]:
 
-        gap = next_unit["indices"][0] - current["indices"][-1] - 1
+        gap = nxt["indices"][0] - current["indices"][-1] - 1
 
         if 0 < gap <= max_gap:
-            # Merge with gap
-            current["tokens"] += ["..."] + next_unit["tokens"]
-            current["indices"] += next_unit["indices"]
+            # Merge tokens
+            current["tokens"] += nxt["tokens"]
+
+            # Merge indices
+            current["indices"] += nxt["indices"]
+
         else:
-            gappy.append(current)
-            current = next_unit
+            merged.append(current)
+            current = nxt
 
-    gappy.append(current)
+    merged.append(current)
 
-    return gappy
+    return merged
 
 # -----------------------------
 # Remove contained spans
@@ -129,14 +130,14 @@ def remove_contained(units):
 # Format Output
 # -----------------------------
 def format_units(units):
-
     lines = []
 
     for u in units:
 
-        parts = []
-        for token, idx in zip(u["tokens"], u["indices"]):
-            parts.append(f"{idx}:{token}")
+        parts = [
+            f"{idx}:{tok}"
+            for idx, tok in zip(u["indices"], u["tokens"])
+        ]
 
         lines.append(" ".join(parts))
 
