@@ -144,7 +144,6 @@ Example target:
 Overlapping spans:
 {spans}
 
-<think>
 </think>
 """
 
