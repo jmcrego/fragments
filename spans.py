@@ -21,6 +21,16 @@ class splitPunctuation():
         return self.pretok.pre_tokenize_str(text)
 
     def join(self, text, tokens_with_offsets):
+
+        # Correct reconstruction
+        start = tokens_with_offsets[0][1][0]
+        end = tokens_with_offsets[-1][1][1]
+
+        recovered = text[start:end]
+
+        print("Recovered text:", recovered)
+
+
         # Sort tokens by their start offset
         tokens_with_offsets.sort(key=lambda x: x[1][0])  # Sort by start offset
 
