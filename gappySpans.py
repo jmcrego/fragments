@@ -69,44 +69,39 @@ def spans_to_units(spans, source_tokens):
 
 
 # -----------------------------
-# Expand spans by merging nearby units
+# Expand spans with gappy units
 # -----------------------------
-def merge_units(units):
+def build_gappy_units(units, max_gap=4):
+    """
+    Merge non-adjacent units into gappy spans.
 
-    merged = []
+    If two spans are close enough (gap <= max_gap),
+    merge them into a single gappy unit.
+    """
 
-    used = set()
+    if not units:
+        return []
 
-    for i in range(len(units)):
+    units = sorted(units, key=lambda x: x["indices"][0])
 
-        if i in used:
-            continue
+    gappy = []
+    current = units[0]
 
-        current = units[i]
-        merged_tokens = current["tokens"]
-        merged_indices = current["indices"]
+    for next_unit in units[1:]:
 
-        for j in range(i + 1, len(units)):
+        gap = next_unit["indices"][0] - current["indices"][-1] - 1
 
-            if j in used:
-                continue
+        if 0 < gap <= max_gap:
+            # Merge with gap
+            current["tokens"] += ["..."] + next_unit["tokens"]
+            current["indices"] += next_unit["indices"]
+        else:
+            gappy.append(current)
+            current = next_unit
 
-            next_unit = units[j]
+    gappy.append(current)
 
-            # check if adjacent in index space
-            if next_unit["indices"][0] == merged_indices[-1] + 1:
-
-                merged_tokens += next_unit["tokens"]
-                merged_indices += next_unit["indices"]
-                used.add(j)
-
-        merged.append({
-            "tokens": merged_tokens,
-            "indices": merged_indices
-        })
-
-    return merged
-
+    return gappy
 
 # -----------------------------
 # Remove contained spans
@@ -162,7 +157,7 @@ def extract_source_units(input_sentence, source_sentence):
 
     units = spans_to_units(contiguous, source_tokens)
 
-    units = merge_units(units)
+    units = build_gappy_units(units)
 
     units = remove_contained(units)
 
