@@ -55,6 +55,25 @@ def get_overlapping_spans(
     return spans_filtered_strings
 
 
+def get_spans_from_files(input_file, source_file, min_tok_len=1, min_str_len=3, lc=True):
+    sp = splitPunctuation()
+    with open(args.i) as fi, open(args.o) as fo, open(args.s) as fs, open(args.t) as ft:
+        for idx, (i, o, s, t) in enumerate(zip(fi, fo, fs, ft)):
+            i_with_offsets = sp(i.strip())
+            s_with_offsets = sp(s.strip())
+            if len(i_with_offsets) and len(s_with_offsets):
+                i_tokens = [token for token, _ in i_with_offsets]
+                s_tokens = [token for token, _ in s_with_offsets]
+                source_spans = get_overlapping_spans(i_tokens, s_tokens, min_tok_len=min_tok_len, min_str_len=min_str_len)
+                if len(source_spans):
+                    yield {
+                        "idx": idx,
+                        "input": i.strip(),
+                        "source": s.strip(),
+                        "target": t.strip(),
+                        "output": o.strip(),
+                        "spans": [span.strip() for span in source_spans]
+                    }
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script to run inference of EuroLLM models using vLLM.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -68,34 +87,7 @@ if __name__ == "__main__":
     args = parser.parse_args()    
     tic = time.time()
 
-    sp = splitPunctuation()
-
-    n_output = 0
-    with open(args.i) as fi, open(args.o) as fo, open(args.s) as fs, open(args.t) as ft:
-        idx = 0
-        for i, o, s, t in zip(fi, fo, fs, ft):
-            i_with_offsets = sp(i.strip())
-            o_with_offsets = sp(o.strip())
-            s_with_offsets = sp(s.strip())
-            t_with_offsets = sp(t.strip())
-            if len(i_with_offsets) and len(o_with_offsets) and len(s_with_offsets) and len(t_with_offsets):
-                i_tokens = [token for token, _ in i_with_offsets]
-                o_tokens = [token for token, _ in o_with_offsets]
-                s_tokens = [token for token, _ in s_with_offsets]
-                t_tokens = [token for token, _ in t_with_offsets]
-                source_spans = get_overlapping_spans(i_tokens, s_tokens, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len)
-                if len(source_spans):
-                    # print(f"I {idx}\t{' '.join(i_tokens)}")
-                    # print(f"S {idx}\t{' '.join(s_tokens)}")
-                    # print(f"T {idx}\t{' '.join(t_tokens)}") 
-                    # print(f"O {idx}\t{' '.join(o_tokens)}")
-                    print(f"I {idx}\t{i.strip()}")
-                    print(f"S {idx}\t{s.strip()}")
-                    print(f"M {idx}\t{[span.strip() for span in source_spans]}")
-                    print(f"T {idx}\t{t.strip()}") 
-                    print(f"O {idx}\t{o.strip()}")
-                    n_output += 1
-            idx += 1
-            if args.stop_at and n_output >= args.stop_at:
-                break
-    sys.stderr.write(f"Done! output {n_output} out of {idx} samples\n")
+    for idx, sample in enumerate(get_spans_from_files(args.i, args.s, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len)):
+        print(f"=== Sample {idx} =============================\n{sample}")
+        if args.stop_at and idx >= args.stop_at:
+            break
