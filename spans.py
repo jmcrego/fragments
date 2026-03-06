@@ -37,9 +37,10 @@ def get_overlapping_spans(input_tokens, source_tokens, min_tok_len=1, min_str_le
 
     spans = []
     for span in common_spans: #('the', 'day', 'is')
-        if len(span) >= min_str_len:
+        if len(' '.join(span)) >= min_str_len:
             i = s_spans[span] #0
             spans.append((i, i+len(span))) #[(0, 3)] meaning that the span 'the day is' starts at position 0 and ends at position 3 in the source tokens list
+            print(f"added span: {span} {spans[-1]}")
 
     # filter out spans that are contained within other spans (use token strings, not positions)
     spans_filtered_strings = []
