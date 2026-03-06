@@ -83,6 +83,7 @@ def build_gappy_units(units, max_gap=6):
         return []
 
     units = sorted(units, key=lambda x: x["indices"][0])
+    # Sort spans by their first index BEFORE merging
 
     merged = []
     current = units[0]
@@ -158,6 +159,7 @@ def get_spans_from_files(input_file, source_file, target_file, output_file, min_
                 alignment = lcs_alignment(i_tokens, s_tokens)
                 contiguous = build_maximal_spans(alignment)
                 units = spans_to_units(contiguous, s_tokens)
+                units = sorted(units, key=lambda x: x["indices"][0])
                 units = build_gappy_units(units)
                 units = remove_contained(units)
                 units = format_units(units)
