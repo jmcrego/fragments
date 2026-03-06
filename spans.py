@@ -33,14 +33,14 @@ def get_overlapping_spans(input_tokens, source_tokens, min_tok_len=1, min_str_le
     i_spans = extract_ngrams_with_position(itoks, min_tok_len, max_tok_len) #{('the', 'day', 'is'): 0, ...}
     s_spans = extract_ngrams_with_position(stoks, min_tok_len, max_tok_len) #{('the', 'day', 'is'): 0, ...}
     common_spans = set(s_spans.keys()) & set(i_spans.keys()) #('the', 'day', 'is')
-    print(f"common_spans: {common_spans}")
+    # print(f"common_spans: {common_spans}")
 
     spans = []
     for span in common_spans: #('the', 'day', 'is')
         if len(' '.join(span)) >= min_str_len:
             i = s_spans[span] #0
             spans.append((i, i+len(span))) #[(0, 3)] meaning that the span 'the day is' starts at position 0 and ends at position 3 in the source tokens list
-            print(f"added span: {span} {spans[-1]}")
+            # print(f"added span: {span} {spans[-1]}")
 
     # filter out spans that are contained within other spans (use token strings, not positions)
     spans_filtered_strings = []
@@ -49,7 +49,7 @@ def get_overlapping_spans(input_tokens, source_tokens, min_tok_len=1, min_str_le
         # check if any of the already added spans contains the current span tokens
         if not any(span_str.lower() in s.lower() for s in spans_filtered_strings):
             spans_filtered_strings.append(span_str)
-    print(f"spans_filtered_strings: {spans_filtered_strings}")
+    # print(f"spans_filtered_strings: {spans_filtered_strings}")
 
     return spans_filtered_strings
 
@@ -61,11 +61,11 @@ def get_spans_from_files(input_file, source_file, target_file, output_file, min_
             i_with_offsets = sp(i.strip())
             s_with_offsets = sp(s.strip())
             if len(i_with_offsets) and len(s_with_offsets) and len(o.strip()) and len(t.strip()):
-                print(f"idx: {idx}")
+                # print(f"idx: {idx}")
                 i_tokens = [token for token, _ in i_with_offsets]
                 s_tokens = [token for token, _ in s_with_offsets]
-                print(f"i_tokens: {i_tokens}")
-                print(f"s_tokens: {s_tokens}")
+                # print(f"i_tokens: {i_tokens}")
+                # print(f"s_tokens: {s_tokens}")
                 source_spans = get_overlapping_spans(i_tokens, s_tokens, min_tok_len=min_tok_len, min_str_len=min_str_len)
                 if len(source_spans):
                     yield {
