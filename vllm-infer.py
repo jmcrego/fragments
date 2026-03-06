@@ -86,11 +86,11 @@ if __name__ == "__main__":
     with open(args.output_json, 'w') as fdo, open(args.output_json+'.log', 'w') as fdl:
 
         # dump into fdo a batch of samples with their generated pairs
-        def dump(samples, results):
+        def dump(samples, prompts, results):
             for k in range(len(samples)):
                 samples[k]['pairs'] = get_pairs(results[k])
                 fdo.write(json.dumps(samples[k], ensure_ascii=False) + "\n")
-                fdl.write(f"\n========================\n{samples[k]}\n------------------------\n{results[k]}\n")
+                fdl.write(f"\n========================\n{prompts[k]}\n------------------------\n{results[k]}\n************************\n{samples[k]}\n")
             fdo.flush()
             fdl.flush()
 
@@ -102,11 +102,11 @@ if __name__ == "__main__":
             prompts.append(get_formatted_prompt(sample, prompt_num=args.prompt_num))
 
             if len(samples) == args.batch_size:
-                dump(samples, process_batch(llm, prompts))
+                dump(samples, prompts, process_batch(llm, prompts))
                 samples, prompts = [], []
 
         if len(samples):
-            dump(samples, process_batch(llm, prompts))
+            dump(samples, prompts, process_batch(llm, prompts))
             samples, prompts = [], []
 
 
