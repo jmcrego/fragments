@@ -17,8 +17,8 @@ class splitPunctuation():
 def get_overlapping_spans(
         input_tokens,
         source_tokens,
-        min_len=1,
-        min_string_len=3,
+        min_tok_len=1,
+        min_str_len=3,
         lc=True,
 ):
     """find overlapping spans between lists input_tokens and source_tokens."""
@@ -33,9 +33,9 @@ def get_overlapping_spans(
                 spans[span] = i #('the', 'day') ==> 3 (position where the span start, only the last occurrence is saved)
         return spans 
 
-    max_len = min(len(stoks),len(itoks))
-    i_spans = extract_ngrams_with_position(itoks, min_len, max_len)
-    s_spans = extract_ngrams_with_position(stoks, min_len, max_len)
+    max_tok_len = min(len(stoks),len(itoks))
+    i_spans = extract_ngrams_with_position(itoks, min_tok_len, max_tok_len)
+    s_spans = extract_ngrams_with_position(stoks, min_tok_len, max_tok_len)
     common_spans = set(s_spans.keys()) & set(i_spans.keys()) #intersection of keys
 
     spans = []
@@ -43,11 +43,11 @@ def get_overlapping_spans(
         i = s_spans[span] #source_spans
         spans.append((i, i+len(span)))
 
-    # filter out spans that are contained within other spans (use actual token strings, not positions)
+    # filter out spans that are contained within other spans (use token strings, not positions)
     spans_filtered_strings = []
     for span in sorted(spans, key=lambda x: x[1] - x[0], reverse=True): #larger to smaller
         span_string = " "+' '.join(stoks[span[0]:span[1]])+" " # the string corresponding to the span positions (i.e. ' the day ')
-        if len(span_string)-2 < min_string_len:
+        if len(span_string)-2 < min_str_len:
             continue
         # check if any of the already added spans contains the current span tokens
         if not any(span_string in s for s in spans_filtered_strings):
@@ -62,6 +62,8 @@ if __name__ == "__main__":
     parser.add_argument("-o", type=str, required=True, help="Output file (tokenized).")
     parser.add_argument("-s", type=str, required=True, help="Source file (tokenized).")
     parser.add_argument("-t", type=str, required=True, help="Target file (tokenized).")
+    parser.add_argument("-min_tok_len", type=int, default=1, help="Minimum number of tokens in a span.")
+    parser.add_argument("-min_str_len", type=int, default=3, help="Minimum number of characters in a span.")
     parser.add_argument("-stop_at", type=int, default=0, help="Stop when already generated that many spans.")
     args = parser.parse_args()    
     tic = time.time()
@@ -81,7 +83,7 @@ if __name__ == "__main__":
                 o_tokens = [token for token, _ in o_with_offsets]
                 s_tokens = [token for token, _ in s_with_offsets]
                 t_tokens = [token for token, _ in t_with_offsets]
-                source_spans = get_overlapping_spans(i_tokens, s_tokens)
+                source_spans = get_overlapping_spans(i_tokens, s_tokens, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len)
                 if len(source_spans):
                     # print(f"I {idx}\t{' '.join(i_tokens)}")
                     # print(f"S {idx}\t{' '.join(s_tokens)}")
