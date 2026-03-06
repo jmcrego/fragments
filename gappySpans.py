@@ -71,19 +71,14 @@ def spans_to_units(spans, source_tokens):
 
 
 # -----------------------------
-# Expand spans with gappy units
+# Build gappy units
 # -----------------------------
 def build_gappy_units(units, max_gap=6):
-    """
-    Merge units if they are close enough.
-    No gap tokens are inserted.
-    """
 
     if not units:
         return []
 
     units = sorted(units, key=lambda x: x["indices"][0])
-    # Sort spans by their first index BEFORE merging
 
     merged = []
     current = units[0]
@@ -92,11 +87,9 @@ def build_gappy_units(units, max_gap=6):
 
         gap = nxt["indices"][0] - current["indices"][-1] - 1
 
-        if 0 < gap <= max_gap:
-            # Merge tokens
-            current["tokens"] += nxt["tokens"]
+        if 0 <= gap <= max_gap:
 
-            # Merge indices
+            current["tokens"] += nxt["tokens"]
             current["indices"] += nxt["indices"]
 
         else:
@@ -128,6 +121,21 @@ def remove_contained(units):
 
     return filtered
 
+# -----------------------------
+# Remove duplicate units
+# -----------------------------
+def remove_duplicate(units):
+
+    seen = set()
+    unique = []
+
+    for u in units:
+        key = tuple(u["indices"])
+        if key not in seen:
+            seen.add(key)
+            unique.append(u)
+
+    return unique
 
 # -----------------------------
 # Format Output
@@ -159,9 +167,9 @@ def get_spans_from_files(input_file, source_file, target_file, output_file, min_
                 alignment = lcs_alignment(i_tokens, s_tokens)
                 contiguous = build_maximal_spans(alignment)
                 units = spans_to_units(contiguous, s_tokens)
-                units = sorted(units, key=lambda x: x["indices"][0])
                 units = build_gappy_units(units)
                 units = remove_contained(units)
+                units = remove_duplicate(units)
                 units = format_units(units)
                 if len(units):
                     yield {
