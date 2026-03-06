@@ -56,7 +56,7 @@ def get_overlapping_spans(
     return spans_filtered_strings
 
 
-def get_spans_from_files(input_file, source_file, target_file, output_file, min_tok_len=1, min_str_len=3, lc=True):
+def get_spans_from_files(input_file, source_file, target_file, output_file, min_tok_len=1, min_str_len=3):
     sp = splitPunctuation()
     with open(input_file) as fi, open(output_file) as fo, open(source_file) as fs, open(target_file) as ft:
         for idx, (i, o, s, t) in enumerate(zip(fi, fo, fs, ft)):
