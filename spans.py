@@ -48,18 +48,14 @@ def get_overlapping_spans(
         i = s_spans[span] #source_spans
         spans.append((i, i+len(span)))
 
-    if filter_contained:
-        # filter out spans that are contained within other spans (use actual token strings, not positions)
-        spans_filtered = []
-        spans_filtered_strings = []
-        for span in sorted(spans, key=lambda x: x[1] - x[0], reverse=True): #larger to smaller
-            span_string = " "+' '.join(stoks[span[0]:span[1]])+" " # the string corresponding to the span positions (i.e. ' the day ')
-            # check if any of the already added spans contains the current span tokens
-            if not any(span_string in s for s in spans_filtered_strings):
-                spans_filtered.append(span)
-                spans_filtered_strings.append(span_string)
-        return spans_filtered
-    return spans
+    # filter out spans that are contained within other spans (use actual token strings, not positions)
+    spans_filtered_strings = []
+    for span in sorted(spans, key=lambda x: x[1] - x[0], reverse=True): #larger to smaller
+        span_string = " "+' '.join(stoks[span[0]:span[1]])+" " # the string corresponding to the span positions (i.e. ' the day ')
+        # check if any of the already added spans contains the current span tokens
+        if not any(span_string in s for s in spans_filtered_strings):
+            spans_filtered_strings.append(span_string)
+    return spans_filtered_strings
 
 
 
@@ -91,11 +87,13 @@ if __name__ == "__main__":
                 source_spans = get_overlapping_spans(i_tokens, s_tokens)
                 if len(source_spans):
                     # print(f"I {idx}\t{' '.join(i_tokens)}")
-                    print(f"I {idx}\t{i.strip()}")
-                    print(f"S {idx}\t{' '.join(s_tokens)}")
-                    print(f"M {idx}\t{source_spans}")
-                    print(f"T {idx}\t{' '.join(t_tokens)}") 
+                    # print(f"S {idx}\t{' '.join(s_tokens)}")
+                    # print(f"T {idx}\t{' '.join(t_tokens)}") 
                     # print(f"O {idx}\t{' '.join(o_tokens)}")
+                    print(f"I {idx}\t{i.strip()}")
+                    print(f"S {idx}\t{s.strip}")
+                    print(f"M {idx}\t{source_spans}")
+                    print(f"T {idx}\t{t.strip()}") 
                     print(f"O {idx}\t{o.strip()}")
                     n_output += 1
             idx += 1
