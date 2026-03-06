@@ -207,7 +207,9 @@ def get_spans_from_files(input_file, source_file, target_file, output_file, min_
             # i_tokens = tokenize(i.strip())
             # s_tokens = tokenize(s.strip())
             if len(i_tokens) and len(s_tokens) and len(o.strip()) and len(t.strip()):
-                alignment = lcs_alignment(i_tokens, s_tokens)
+                i_tokens_lc = [x.lower() for x in i_tokens]
+                s_tokens_lc = [x.lower() for x in s_tokens]
+                alignment = lcs_alignment(i_tokens_lc, s_tokens_lc)
                 contiguous = build_maximal_spans(alignment)
                 units = spans_to_units(contiguous, s_tokens)
                 units = build_gappy_units(units)
