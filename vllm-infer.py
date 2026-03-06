@@ -5,35 +5,88 @@ from typing import List, Dict, Any, Union
 from vllm import LLM, SamplingParams
 from utils import read_josep_file
 
+prompt = """
+You are given:
 
-def get_formatted_prompt(
-    sample
-):
-    print(f"my sample is: {sample}")
-    #jmcc, next is to filter out some spans                                                                                                                                                                                                                                                   
-    spans_filtered = []
-    for span in sample["spans"]:
-        if len(span) >= MIN_SPAN_LEN_IN_CHARS and not span in spans_filtered:
-            spans_filtered.append(span)
-    sample["spans"] = spans_filtered
-    print(f"filtered spans: {spans_filtered}")
+1) An input sentence to be translated.
 
-    formatted_prompt = prompt.format(
+2) A translation example consisting of:
+   - Source sentence (example source)
+   - Target sentence (its translation)
+
+3) A list of overlapping spans that appear in BOTH:
+   - the input sentence
+   - the example source sentence
+
+Your task has two steps.
+
+--------------------------------
+Step 1 — Extract alignments
+--------------------------------
+
+For each overlapping span, identify the corresponding translation span in the example target sentence.
+
+Output the alignments using the format:
+
+<ALIGNS>
+source span === target span
+source span === target span
+</ALIGNS>
+
+Rules:
+- Each source span MUST come from the list "Overlapping spans".
+- Each target span MUST be a contiguous substring taken from the example target sentence.
+- Prefer the translation span that best matches the semantic unit of the source span.
+
+--------------------------------
+Step 2 — Refine useful spans
+--------------------------------
+
+Evaluate the extracted alignments and produce a refined list of spans that could help translate the input sentence.
+
+Output the refined spans using the format:
+
+<SPANS>
+source span ||| target span
+source span ||| target span
+</SPANS>
+
+Rules:
+- Discard spans that contain only function words or punctuation  (e.g., "of the", "in the").
+- Discard pairs where the alignment is incorrect or unclear.
+- Adapt the target span so that it would fit naturally when translating the input sentence (adjust morphology, determiners, or phrasing if needed).
+
+Stop generating immediately after </SPANS>.
+
+--------------------------------
+Input
+--------------------------------
+
+Input sentence:
+{input}
+
+Example source:
+{source}
+
+Example target:
+{target}
+
+Overlapping spans:
+{spans}
+
+"""
+
+def get_formatted_prompt(sample):
+    return prompt.format(
         input=sample["input"],
         source=sample["source"],
         target=sample["target"],
-	spans='\n'.join(sample["spans"])
+    	spans='\n'.join(sample["spans"])
     )
-    return formatted_prompt
 
 
-def load_vllm_model(
-    base_model_path: str, 
-    **kwargs
-) -> LLM:
-    """Load model using VLLM for optimized inference."""    
-    # VLLM configuration - automatically handles quantization and optimization
-    llm = LLM(
+def load_vllm_model(base_model_path: str, **kwargs) -> LLM:
+    return LLM( # VLLM configuration - automatically handles quantization and optimization
         model=base_model_path,
         trust_remote_code=True,
         dtype="auto",  # VLLM will automatically choose the best dtype
@@ -41,18 +94,16 @@ def load_vllm_model(
         max_model_len=4096,  # Adjust based on your needs
         tensor_parallel_size=1,  # Set to number of GPUs if using multiple
         **kwargs
-    )    
-    return llm
+    )
 
-def generate(
-    llm: LLM,
-    prompts: List[str],
-    max_tokens: int = 256,
-    temperature: float = 0.7,
-    top_p: float = 0.9,
-    repetition_penalty: float = 1.1,
-    use_sampling: bool = False
-) -> List[str]:
+def generate(llm: LLM, 
+             prompts: List[str], 
+             max_tokens: int = 256, 
+             temperature: float = 0.7, 
+             top_p: float = 0.9, 
+             repetition_penalty: float = 1.1, 
+             use_sampling: bool = False
+            ) -> List[str]:
     """
     Generate responses for single prompt or batch of prompts.
     Returns: Single string if input was string, list of strings if input was list
@@ -73,20 +124,7 @@ def generate(
     # Return responses
     return [output.outputs[0].text for output in outputs]
 
-def print_debug(
-    prompt, 
-    response
-):
-    sys.stderr.write(f"=== Prompt {sample['idx']} =============================\n")
-    sys.stderr.write(f"{prompt}\n")
-    sys.stderr.write(f"=== Response {sample['idx']} =============================\n")
-    sys.stderr.write(f"{response}\n")
-
-
-def process_batch(
-    llm, 
-    prompts,
-):
+def process_batch(llm, prompts):
     # Generate responses for this batch
     responses = generate(
         llm, 
@@ -96,58 +134,56 @@ def process_batch(
     )
     return responses    
 
-
-def process_file(llm, IFILE, BATCH_SIZE=32):
+def process_file(llm, IFILE, OFILE, BATCH_SIZE=32):
      
-    def get_pairs(prompt, response, idx):
-        print(f"prompt {idx} = {prompt}")
-        print(f"response {idx} = {response}")
-        pairs = []
-        for pair in response.split('\n'):
-            if ' ||| ' in pair:
-                toks = pair.split(' ||| ')
-                if len(toks) == 2:
-                    s, t = toks[0], toks[1]
-                    pairs.append((s.strip(), t.strip()))
-                else:
-                    sys.stderr.write(f"skipping pair: {pair}")
-        print(f"pairs {idx} = {pairs}")
-        return pairs
+    def get_fragments(idx, prompt, result, verbose=True):
+        fragments = []
+        for line in result.split('\n'):
+            toks = line.split(' ||| ')
+            if len(toks) == 2:
+                s, t = toks[0], toks[1]
+                fragments.append((s.strip(), t.strip()))
+        if verbose:
+            print(f"=== Prompt {idx} =============================\n{prompt}")
+            print(f"=== Result {idx} =============================\n{result}")
+            print(f"=== Fragments {idx} =============================\n{'\n'.join(fragments)}")
+        return fragments
 
-    samples = []
-    prompts = []
-    with open(IFILE+'.V3.json', "w", encoding="utf-8") as fdo:
+    idxs, samples, prompts = [], [], []
 
-        def dump(samples, prompts, responses, idxs):
+    with open(OFILE, "w", encoding="utf-8") as fdo:
+
+        def dump(idxs, samples, prompts, results):
             for k in range(len(samples)):
-                samples[k]['pairs'] = get_pairs(prompts[k], responses[k], idxs[k])
+                samples[k]['pairs'] = get_fragments(idxs[k], prompts[k], results[k])
                 fdo.write(json.dumps(samples[k], ensure_ascii=False) + "\n")
             fdo.flush()
 
-        idxs = []
         for idx, sample in enumerate(read_josep_file(IFILE)):
-            print(f"idx: {idx} sample: {sample}")
-            samples.append(sample)
+
             idxs.append(idx)
+            samples.append(sample)
             prompts.append(get_formatted_prompt(sample))
+
             if len(samples) == BATCH_SIZE:
-                responses = process_batch(llm, prompts)
-                dump(samples, prompts, responses, idxs)
-                samples = []
-                prompts = []
-                idxs = []
+                results = process_batch(llm, prompts)
+                dump(idxs, samples, prompts, results)
+                idxs, samples, promtps = [], [], []
+
         if len(samples):
-            responses = process_batch(llm, prompts)
-            dump(samples, prompts, responses, idxs)
+            results = process_batch(llm, prompts)
+            dump(samples, prompts, results, idxs)
+
+    sys.stderr.write(f"Done\n")
 
 
 if __name__ == "__main__":
-    BASE_MODEL_NAME = "/lustre/fsmisc/dataset/HuggingFace_Models/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+    BASE_MODEL_PATH = "/lustre/fsmisc/dataset/HuggingFace_Models/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
     IFILE = sys.argv[1]
-    BATCH_SIZE=64
+    OFILE = sys.argv[2] + '.json' if not sys.argv[2].endswith('.json') else sys.argv[2]
 
-    llm = load_vllm_model(BASE_MODEL_NAME)
-    process_file(llm, IFILE, BATCH_SIZE=BATCH_SIZE)
+    llm = load_vllm_model(BASE_MODEL_PATH)
+    process_file(llm, IFILE, OFILE)
 
 
 
