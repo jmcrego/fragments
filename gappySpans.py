@@ -154,7 +154,6 @@ def format_units(units):
 
     return lines
 
-
 # -----------------------------
 # Main Function
 # -----------------------------
