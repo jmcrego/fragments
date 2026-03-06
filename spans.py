@@ -93,6 +93,7 @@ if __name__ == "__main__":
     tic = time.time()
 
     for idx, sample in enumerate(get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len)):
-        # print(f"=== Sample {idx} =============================\n{json.dumps(sample, indent=4, ensure_ascii=False)}")
+        # print(f"=== Sample {idx} =============================")
+        print(json.dumps(sample, ensure_ascii=False))
         if args.stop_at and idx >= args.stop_at:
             break
