@@ -91,8 +91,8 @@ if __name__ == "__main__":
                     # print(f"T {idx}\t{' '.join(t_tokens)}") 
                     # print(f"O {idx}\t{' '.join(o_tokens)}")
                     print(f"I {idx}\t{i.strip()}")
-                    print(f"S {idx}\t{s.strip}")
-                    print(f"M {idx}\t{source_spans}")
+                    print(f"S {idx}\t{s.strip()}")
+                    print(f"M {idx}\t{[span.strip() for span in source_spans]}")
                     print(f"T {idx}\t{t.strip()}") 
                     print(f"O {idx}\t{o.strip()}")
                     n_output += 1
