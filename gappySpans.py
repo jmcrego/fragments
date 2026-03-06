@@ -151,7 +151,7 @@ def format_units(units):
 # Main Function
 # -----------------------------
 def get_spans_from_files(input_file, source_file, target_file, output_file, min_tok_len=1, min_str_len=3, max_gap=6):
-    with open(input_file) as fi, open(output_file) as fo, open(source_file) as fs, open(target_file) as ft:
+    with open(input_file, encoding="utf-8") as fi, open(output_file, encoding="utf-8") as fo, open(source_file, encoding="utf-8") as fs, open(target_file, encoding="utf-8") as ft:
         for idx, (i, o, s, t) in enumerate(zip(fi, fo, fs, ft)):
             i_tokens = tokenize(i.strip())
             s_tokens = tokenize(s.strip())
