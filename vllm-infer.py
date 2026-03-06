@@ -89,7 +89,7 @@ if __name__ == "__main__":
             for k in range(len(samples)):
                 samples[k]['pairs'] = get_pairs(results[k])
                 fdo.write(json.dumps(samples[k], ensure_ascii=False) + "\n")
-                fdl.write(f"====== {samples[k]} ======\n------ {results[k]} ------\n")
+                fdl.write(f"\n========================\n{samples[k]}\n------------------------\n{results[k]}\n")
             fdo.flush()
             fdl.flush()
 
