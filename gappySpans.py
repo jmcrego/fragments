@@ -162,10 +162,41 @@ def format_units(units):
 
     return lines
 
+def format_units_gaps(units, gap_str="..."):
+
+    lines = []
+
+    for u in units:
+
+        parts = []
+        indices = u["indices"]
+        tokens = u["tokens"]
+
+        if not indices:
+            continue
+
+        # Start with first token
+        parts.append(f"{indices[0]}:{tokens[0]}")
+
+        for prev_idx, curr_idx, token in zip(indices, indices[1:], tokens[1:]):
+
+            gap = curr_idx - prev_idx
+
+            # If gap > 1 → we skipped tokens
+            if gap > 1:
+                parts.append(gap_str)
+
+            parts.append(f"{curr_idx}:{token}")
+
+        lines.append(" ".join(parts))
+
+    return lines
+
+
 # -----------------------------
 # Main Function
 # -----------------------------
-def get_spans_from_files(input_file, source_file, target_file, output_file, min_tok_len=1, min_str_len=3, max_gap=6):
+def get_spans_from_files(input_file, source_file, target_file, output_file, min_tok_len=1, min_str_len=3, max_gap=6, gap_str=None):
     sp = splitPunctuation()
     with open(input_file, encoding="utf-8") as fi, open(output_file, encoding="utf-8") as fo, open(source_file, encoding="utf-8") as fs, open(target_file, encoding="utf-8") as ft:
         for idx, (i, o, s, t) in enumerate(zip(fi, fo, fs, ft)):
@@ -182,7 +213,10 @@ def get_spans_from_files(input_file, source_file, target_file, output_file, min_
                 units = build_gappy_units(units)
                 units = remove_contained(units)
                 units = remove_duplicate(units)
-                units = format_units(units)
+                if gap_str is None:
+                    units = format_units(units)
+                else:
+                    units = format_units_gaps(units, gap_str=gap_str)
                 if len(units):
                     yield {
                         "idx": idx,
@@ -204,10 +238,11 @@ if __name__ == "__main__":
     parser.add_argument("-min_tok_len", type=int, default=1, help="Minimum number of tokens in a span.")
     parser.add_argument("-min_str_len", type=int, default=3, help="Minimum number of characters in a span.")
     parser.add_argument("-max_gap", type=int, default=6, help="Maximum gap size for merging units into gappy units.")
+    parser.add_argument("-gap_str", type=str, default="...", help="String to use for representing gaps in the output.")
     parser.add_argument("-stop_at", type=int, default=0, help="Stop when already generated that many spans.")
     args = parser.parse_args()    
 
-    for idx, sample in enumerate(get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len, max_gap=args.max_gap)):
+    for idx, sample in enumerate(get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len, max_gap=args.max_gap, gap_str=args.gap_str)):
         # print(f"=== Sample {idx} =============================")
         print(json.dumps(sample, ensure_ascii=False, indent=2))
         if args.stop_at and idx >= args.stop_at:
