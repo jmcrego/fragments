@@ -70,8 +70,6 @@ if __name__ == "__main__":
     parser.add_argument("-s", type=str, required=True, help="Source file (tokenized).")
     parser.add_argument("-t", type=str, required=True, help="Target file (tokenized).")
     parser.add_argument("-stop_at", type=int, default=0, help="Stop when already generated that many spans.")
-    parser.add_argument("-lc", action='store_true', help="Use lowercase to match input/source strings.")
-    parser.add_argument("-detokenize", action='store_true', help="Report untokenized (raw) strings.")
     args = parser.parse_args()    
     tic = time.time()
 
@@ -90,13 +88,15 @@ if __name__ == "__main__":
                 o_tokens = [token for token, _ in o_with_offsets]
                 s_tokens = [token for token, _ in s_with_offsets]
                 t_tokens = [token for token, _ in t_with_offsets]
-                source_spans = get_overlapping_spans(i_tokens, s_tokens, lc=args.lc)
+                source_spans = get_overlapping_spans(i_tokens, s_tokens)
                 if len(source_spans):
-                    print(f"I {idx}\t{' '.join(i_tokens)}")
+                    # print(f"I {idx}\t{' '.join(i_tokens)}")
+                    print(f"I {idx}\t{i.strip()}")
                     print(f"S {idx}\t{' '.join(s_tokens)}")
                     print(f"M {idx}\t{source_spans}")
                     print(f"T {idx}\t{' '.join(t_tokens)}") 
-                    print(f"O {idx}\t{' '.join(o_tokens)}")
+                    # print(f"O {idx}\t{' '.join(o_tokens)}")
+                    print(f"O {idx}\t{o.strip()}")
                     n_output += 1
             idx += 1
             if args.stop_at and n_output >= args.stop_at:
