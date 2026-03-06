@@ -83,8 +83,6 @@ if __name__ == "__main__":
 
     llm = load_vllm_model(BASE_MODEL_PATH)
 
-    samples, prompts = [], []
-
     with open(args.output_json, 'w') as fdo:
 
         # dump into fdo a batch of samples with their generated pairs
@@ -94,6 +92,8 @@ if __name__ == "__main__":
                 fdo.write(json.dumps(samples[k], ensure_ascii=False) + "\n")
             fdo.flush()
 
+        samples, prompts = [], []
+        
         for sample in get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len):
 
             samples.append(sample)

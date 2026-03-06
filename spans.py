@@ -61,7 +61,7 @@ def get_spans_from_files(input_file, source_file, target_file, output_file, min_
         for idx, (i, o, s, t) in enumerate(zip(fi, fo, fs, ft)):
             i_with_offsets = sp(i.strip())
             s_with_offsets = sp(s.strip())
-            if len(i_with_offsets) and len(s_with_offsets):
+            if len(i_with_offsets) and len(s_with_offsets) and len(o.strip()) and len(t.strip()):
                 i_tokens = [token for token, _ in i_with_offsets]
                 s_tokens = [token for token, _ in s_with_offsets]
                 source_spans = get_overlapping_spans(i_tokens, s_tokens, min_tok_len=min_tok_len, min_str_len=min_str_len)
@@ -77,7 +77,7 @@ def get_spans_from_files(input_file, source_file, target_file, output_file, min_
                 else:
                     print(f"Warning: No spans found for sample {idx} (input and source have no common spans of at least {min_tok_len} tokens and {min_str_len} characters).", file=sys.stderr)
             else:
-                print(f"Warning: No spans found for sample {idx} (input or source is empty after tokenization).", file=sys.stderr)
+                print(f"Warning: No spans found for sample {idx} (any of input/output/source/target is empty after tokenization).", file=sys.stderr)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script to run inference of EuroLLM models using vLLM.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
