@@ -6,7 +6,6 @@ from tokenizers.pre_tokenizers import Whitespace
 
 
 class splitPunctuation():
-
     def __init__(self):
         self.pretok = Whitespace()
 
@@ -14,13 +13,7 @@ class splitPunctuation():
         return self.pretok.pre_tokenize_str(text)
 
 
-def get_overlapping_spans(
-        input_tokens,
-        source_tokens,
-        min_tok_len=1,
-        min_str_len=3,
-        lc=True,
-):
+def get_overlapping_spans(input_tokens, source_tokens, min_tok_len=1, min_str_len=3, lc=True):
     """find overlapping spans between lists input_tokens and source_tokens."""        
     def extract_ngrams_with_position(tokens, min_len, max_len):
         # extract all n-grams of length between [min_len, max_len] (both included), 
