@@ -55,9 +55,13 @@ def get_overlapping_spans(
         spans_filtered = []
         for span in sorted(spans, key=lambda x: x[1] - x[0], reverse=True): #larger to smaller
             span_tokens = stoks[span[0]:span[1]] # the tokens corresponding to the span positions (i.e. "['the', 'day']")
+            print(f"Checking span {span} with tokens {span_tokens}")
             if not any(span_tokens in stoks[s[0]:s[1]] for s in spans_filtered):
                 spans_filtered.append(span)
-        spans = spans_filtered
+                print(f"Added")
+            else:
+                print(f"Filtered out")
+        return spans_filtered
 
     return spans
 
