@@ -147,34 +147,45 @@ def format_units(units):
 # -----------------------------
 # Main Function
 # -----------------------------
-def extract_source_units(input_sentence, source_sentence):
+def get_spans_from_files(input_file, source_file, target_file, output_file, min_tok_len=1, min_str_len=3, max_gap=6):
+    with open(input_file) as fi, open(output_file) as fo, open(source_file) as fs, open(target_file) as ft:
+        for idx, (i, o, s, t) in enumerate(zip(fi, fo, fs, ft)):
+            i_tokens = tokenize(i.strip())
+            s_tokens = tokenize(s.strip())
+            if len(i_tokens) and len(s_tokens) and len(o.strip()) and len(t.strip()):
+                alignment = lcs_alignment(i_tokens, s_tokens)
+                contiguous = build_maximal_spans(alignment)
+                units = spans_to_units(contiguous, s_tokens)
+                units = build_gappy_units(units)
+                units = remove_contained(units)
+                units = format_units(units)
+                if len(units):
+                    yield {
+                        "idx": idx,
+                        "input": i.strip(),
+                        "source": s.strip(),
+                        "target": t.strip(),
+                        "output": o.strip(),
+                        "spans": [unit.strip() for unit in units]
+                    }
 
-    input_tokens = tokenize(input_sentence)
-    source_tokens = tokenize(source_sentence)
-
-    alignment = lcs_alignment(input_tokens, source_tokens)
-
-    contiguous = build_maximal_spans(alignment)
-
-    units = spans_to_units(contiguous, source_tokens)
-
-    units = build_gappy_units(units)
-
-    units = remove_contained(units)
-
-    return format_units(units)
 
 
-# -----------------------------
-# Example
-# -----------------------------
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Script to run inference of EuroLLM models using vLLM.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-i", type=str, required=True, help="Input file (tokenized).")
+    parser.add_argument("-o", type=str, required=True, help="Output file (tokenized).")
+    parser.add_argument("-s", type=str, required=True, help="Source file (tokenized).")
+    parser.add_argument("-t", type=str, required=True, help="Target file (tokenized).")
+    parser.add_argument("-min_tok_len", type=int, default=1, help="Minimum number of tokens in a span.")
+    parser.add_argument("-min_str_len", type=int, default=3, help="Minimum number of characters in a span.")
+    parser.add_argument("-max_gap", type=int, default=6, help="Maximum gap size for merging units into gappy units.")
+    parser.add_argument("-stop_at", type=int, default=0, help="Stop when already generated that many spans.")
+    args = parser.parse_args()    
 
-    input_sentence = "Can you give me the money back now?"
-    source_sentence = "Could you give me my toy back now please?"
+    for idx, sample in enumerate(get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len, max_gap=args.max_gap)):
+        # print(f"=== Sample {idx} =============================")
+        print(json.dumps(sample, ensure_ascii=False, indent=2))
+        if args.stop_at and idx >= args.stop_at:
+            break
 
-    units = extract_source_units(input_sentence, source_sentence)
-
-    print("\nSource units with indices:\n")
-    for u in units:
-        print(u)
