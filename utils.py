@@ -73,6 +73,8 @@ Example target:
 Overlapping spans:
 {spans}
 
+<think>
+</think>
 """
 
 def get_formatted_prompt(sample):
