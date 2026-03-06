@@ -1,5 +1,4 @@
 import sys
-import time
 import json
 import argparse
 from collections import defaultdict
@@ -90,7 +89,6 @@ if __name__ == "__main__":
     parser.add_argument("-min_str_len", type=int, default=3, help="Minimum number of characters in a span.")
     parser.add_argument("-stop_at", type=int, default=0, help="Stop when already generated that many spans.")
     args = parser.parse_args()    
-    tic = time.time()
 
     for idx, sample in enumerate(get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len)):
         # print(f"=== Sample {idx} =============================")

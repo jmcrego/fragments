@@ -1,8 +1,10 @@
 import time
 import sys
 import json
+import argparse
 from typing import List, Dict, Any, Union
 from vllm import LLM, SamplingParams
+from spans import get_spans_from_files
 from utils import read_josep_file, get_formatted_prompt
 
 
@@ -55,58 +57,57 @@ def process_batch(llm, prompts):
     )
     return responses    
 
-def process_file(llm, IFILE, OFILE, BATCH_SIZE=32):
-     
-    def get_fragments(idx, prompt, result, verbose=True):
-        fragments = []
-        for line in result.split('\n'):
-            toks = line.split(' ||| ')
-            if len(toks) == 2:
-                s, t = toks[0], toks[1]
-                fragments.append((s.strip(), t.strip()))
-        if verbose:
-            print(f"=== Prompt {idx} =============================\n{prompt}")
-            print(f"=== Result {idx} =============================\n{result}")
-            print(f"=== Fragments {idx} =============================\n{'\n'.join(fragments)}")
-        return fragments
+def get_fragments(result):
+    fragments = []
+    for line in result.split('\n'):
+        toks = line.split(' ||| ')
+        if len(toks) == 2:
+            s, t = toks[0], toks[1]
+            fragments.append((s.strip(), t.strip()))
+    return fragments
 
-    idxs, samples, prompts = [], [], []
 
-    with open(OFILE, "w", encoding="utf-8") as fdo:
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Script to run inference of EuroLLM models using vLLM.", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-i", type=str, required=True, help="Input file.")
+    parser.add_argument("-o", type=str, required=True, help="Output file.")
+    parser.add_argument("-s", type=str, required=True, help="Source file.")
+    parser.add_argument("-t", type=str, required=True, help="Target file.")
+    parser.add_argument("-output_json", type=str, required=True, help="Output JSON file to store results.")
+    parser.add_argument("-min_tok_len", type=int, default=1, help="Minimum number of tokens in a span.")
+    parser.add_argument("-min_str_len", type=int, default=3, help="Minimum number of characters in a span.")
+    args = parser.parse_args()    
 
-        def dump(idxs, samples, prompts, results):
+    BATCH_SIZE = 32
+    BASE_MODEL_PATH = "/lustre/fsmisc/dataset/HuggingFace_Models/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+
+    llm = load_vllm_model(BASE_MODEL_PATH)
+
+    samples, prompts = [], []
+
+    with open(args.output_json, 'w') as fdo:
+
+        # dump into fdo a batch of samples with their generated pairs
+        def dump(samples, results):
             for k in range(len(samples)):
-                samples[k]['pairs'] = get_fragments(idxs[k], prompts[k], results[k])
+                samples[k]['pairs'] = get_fragments(results[k])
                 fdo.write(json.dumps(samples[k], ensure_ascii=False) + "\n")
             fdo.flush()
 
-        for idx, sample in enumerate(read_josep_file(IFILE)):
+        for sample in get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len):
 
-            idxs.append(idx)
             samples.append(sample)
             prompts.append(get_formatted_prompt(sample))
 
             if len(samples) == BATCH_SIZE:
-                results = process_batch(llm, prompts)
-                dump(idxs, samples, prompts, results)
-                idxs, samples, promtps = [], [], []
+                dump(samples, process_batch(llm, prompts))
+                samples, prompts = [], []
 
         if len(samples):
-            results = process_batch(llm, prompts)
-            dump(samples, prompts, results, idxs)
+            dump(samples, process_batch(llm, prompts))
+            samples, prompts = [], []
 
     sys.stderr.write(f"Done\n")
-
-
-if __name__ == "__main__":
-    BASE_MODEL_PATH = "/lustre/fsmisc/dataset/HuggingFace_Models/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
-    IFILE = sys.argv[1]
-    OFILE = sys.argv[2] + '.json' if not sys.argv[2].endswith('.json') else sys.argv[2]
-
-    llm = load_vllm_model(BASE_MODEL_PATH)
-    process_file(llm, IFILE, OFILE)
-
-
 
 
     
