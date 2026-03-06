@@ -1,8 +1,6 @@
 import sys
 import time
-import difflib
 import argparse
-from tqdm import tqdm
 from collections import defaultdict
 from tokenizers.pre_tokenizers import Whitespace
 
@@ -56,12 +54,10 @@ def get_overlapping_spans(
         spans_filtered_strings = []
         for span in sorted(spans, key=lambda x: x[1] - x[0], reverse=True): #larger to smaller
             span_string = " "+' '.join(stoks[span[0]:span[1]])+" " # the string corresponding to the span positions (i.e. ' the day ')
-            # print(f"Checking span {span} with tokens {span_string}")
             # check if any of the already added spans contains the current span tokens
             if not any(span_string in s for s in spans_filtered_strings):
                 spans_filtered.append(span)
                 spans_filtered_strings.append(span_string)
-                # print(f"Added")
         return spans_filtered
     return spans
 
@@ -73,7 +69,6 @@ if __name__ == "__main__":
     parser.add_argument("-o", type=str, required=True, help="Output file (tokenized).")
     parser.add_argument("-s", type=str, required=True, help="Source file (tokenized).")
     parser.add_argument("-t", type=str, required=True, help="Target file (tokenized).")
-    parser.add_argument("-min_score", type=float, default=0.5, help="Minimum matching score.")
     parser.add_argument("-stop_at", type=int, default=0, help="Stop when already generated that many spans.")
     parser.add_argument("-lc", action='store_true', help="Use lowercase to match input/source strings.")
     parser.add_argument("-detokenize", action='store_true', help="Report untokenized (raw) strings.")
@@ -82,22 +77,10 @@ if __name__ == "__main__":
 
     sp = splitPunctuation()
 
-    # text = "Hello, world! How's everything going?"
-    # print(f"Original text: {text}")
-
-    # tokens_with_offsets = sp(text)
-
-    # for token, (start, end) in tokens_with_offsets:
-    #     print(f"({start}, {end}) -> {token}")
-
-    # tokens = [token for token, _ in tokens_with_offsets]
-    # print(f"Split tokens: {tokens}")
-
-
     n_output = 0
     with open(args.i) as fi, open(args.o) as fo, open(args.s) as fs, open(args.t) as ft:
         idx = 0
-        for i, o, s, t in tqdm(zip(fi, fo, fs, ft), total=count_lines(args.i), unit=" samples", desc="Samples"):
+        for i, o, s, t in zip(fi, fo, fs, ft):
             i_with_offsets = sp(i.strip())
             o_with_offsets = sp(o.strip())
             s_with_offsets = sp(s.strip())
