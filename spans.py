@@ -21,7 +21,7 @@ class splitPunctuation():
         return self.pretok.pre_tokenize_str(text)
 
     def join(self, text, tokens_with_offsets):
-        return "".join(text[start:end] for _, (start, end) in tokens_with_offsets)
+        return " ".join(text[start:end] for _, (start, end) in tokens_with_offsets)
 
 
 def get_overlapping_spans(
