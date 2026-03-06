@@ -21,37 +21,39 @@ def get_overlapping_spans(
         min_str_len=3,
         lc=True,
 ):
-    """find overlapping spans between lists input_tokens and source_tokens."""
-    itoks = input_tokens if not lc else [x.lower() for x in input_tokens]
-    stoks = source_tokens if not lc else [x.lower() for x in source_tokens]
-        
+    """find overlapping spans between lists input_tokens and source_tokens."""        
     def extract_ngrams_with_position(tokens, min_len, max_len):
-        spans = defaultdict(int)
+        # extract all n-grams of length between [min_len, max_len] (both included), 
+        # and save their starting position in the tokens list (the last occurrence is saved if multiple exist)
+        spans = defaultdict(int) # {['the', 'day'] -> 5} means that the span 'the day' starts at position 5 in the tokens list
         for n in range(min_len, max_len + 1):
+            # spans of length n
             for i in range(len(tokens) - n + 1):
                 span = tuple(tokens[i:i + n])
-                spans[span] = i #('the', 'day') ==> 3 (position where the span start, only the last occurrence is saved)
+                # save the starting position of the span in the tokens list (the last occurrence is saved if multiple exist)
+                spans[span] = i 
         return spans 
 
+    itoks = input_tokens if not lc else [x.lower() for x in input_tokens] #['the', 'day', 'is', 'sunny']
+    stoks = source_tokens if not lc else [x.lower() for x in source_tokens] #['the', 'day', 'is', 'rainy']
     max_tok_len = min(len(stoks),len(itoks))
-    i_spans = extract_ngrams_with_position(itoks, min_tok_len, max_tok_len)
-    s_spans = extract_ngrams_with_position(stoks, min_tok_len, max_tok_len)
-    common_spans = set(s_spans.keys()) & set(i_spans.keys()) #intersection of keys
+    i_spans = extract_ngrams_with_position(itoks, min_tok_len, max_tok_len) #{('the', 'day', 'is'): 0, ...}
+    s_spans = extract_ngrams_with_position(stoks, min_tok_len, max_tok_len) #{('the', 'day', 'is'): 0, ...}
+    common_spans = set(s_spans.keys()) & set(i_spans.keys()) #('the', 'day', 'is')
 
     spans = []
-    for span in common_spans:
-        i = s_spans[span] #source_spans
-        spans.append((i, i+len(span)))
+    for span in common_spans: #('the', 'day', 'is')
+        if len(span) >= min_str_len:
+            i = s_spans[span] #0
+            spans.append((i, i+len(span))) #[(0, 3)] meaning that the span 'the day is' starts at position 0 and ends at position 3 in the source tokens list
 
     # filter out spans that are contained within other spans (use token strings, not positions)
     spans_filtered_strings = []
     for span in sorted(spans, key=lambda x: x[1] - x[0], reverse=True): #larger to smaller
-        span_string = " "+' '.join(stoks[span[0]:span[1]])+" " # the string corresponding to the span positions (i.e. ' the day ')
-        if len(span_string)-2 < min_str_len:
-            continue
+        span_str = " "+' '.join(source_tokens[span[0]:span[1]])+" " # the string corresponding to the span positions (i.e. ' the day is ')
         # check if any of the already added spans contains the current span tokens
-        if not any(span_string in s for s in spans_filtered_strings):
-            spans_filtered_strings.append(span_string)
+        if not any(span_str in s for s in spans_filtered_strings):
+            spans_filtered_strings.append(span_str)
     return spans_filtered_strings
 
 
