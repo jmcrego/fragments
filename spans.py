@@ -5,11 +5,6 @@ from collections import defaultdict
 from tokenizers.pre_tokenizers import Whitespace
 
 
-def count_lines(file_path):
-    with open(file_path, 'r') as f:
-        return sum(1 for _ in f)  # Lazy iteration
-
-
 class splitPunctuation():
 
     def __init__(self):
@@ -23,8 +18,8 @@ def get_overlapping_spans(
         input_tokens,
         source_tokens,
         min_len=1,
+        min_string_len=3,
         lc=True,
-        filter_contained=True,
 ):
     """find overlapping spans between lists input_tokens and source_tokens."""
     itoks = input_tokens if not lc else [x.lower() for x in input_tokens]
@@ -52,6 +47,8 @@ def get_overlapping_spans(
     spans_filtered_strings = []
     for span in sorted(spans, key=lambda x: x[1] - x[0], reverse=True): #larger to smaller
         span_string = " "+' '.join(stoks[span[0]:span[1]])+" " # the string corresponding to the span positions (i.e. ' the day ')
+        if len(span_string)-2 < min_string_len:
+            continue
         # check if any of the already added spans contains the current span tokens
         if not any(span_string in s for s in spans_filtered_strings):
             spans_filtered_strings.append(span_string)
