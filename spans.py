@@ -55,9 +55,9 @@ def get_overlapping_spans(
     return spans_filtered_strings
 
 
-def get_spans_from_files(input_file, source_file, min_tok_len=1, min_str_len=3, lc=True):
+def get_spans_from_files(input_file, source_file, target_file, output_file, min_tok_len=1, min_str_len=3, lc=True):
     sp = splitPunctuation()
-    with open(args.i) as fi, open(args.o) as fo, open(args.s) as fs, open(args.t) as ft:
+    with open(input_file) as fi, open(output_file) as fo, open(source_file) as fs, open(target_file) as ft:
         for idx, (i, o, s, t) in enumerate(zip(fi, fo, fs, ft)):
             i_with_offsets = sp(i.strip())
             s_with_offsets = sp(s.strip())
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     args = parser.parse_args()    
     tic = time.time()
 
-    for idx, sample in enumerate(get_spans_from_files(args.i, args.s, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len)):
+    for idx, sample in enumerate(get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len)):
         print(f"=== Sample {idx} =============================\n{sample}")
         if args.stop_at and idx >= args.stop_at:
             break
