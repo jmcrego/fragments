@@ -53,12 +53,14 @@ def get_overlapping_spans(
     if filter_contained:
         # filter out spans that are contained within other spans (use actual token strings, not positions)
         spans_filtered = []
+        spans_filtered_strings = []
         for span in sorted(spans, key=lambda x: x[1] - x[0], reverse=True): #larger to smaller
             span_string = " "+' '.join(stoks[span[0]:span[1]])+" " # the string corresponding to the span positions (i.e. ' the day ')
             print(f"Checking span {span} with tokens {span_string}")
             # check if any of the already added spans contains the current span tokens
-            if not any(span_string in " "+' '.join(stoks[s[0]:s[1]])+" " for s in spans_filtered):
+            if not any(span_string in s for s in spans_filtered_strings):
                 spans_filtered.append(span)
+                spans_filtered_strings.append(span_string)
                 print(f"Added")
             else:
                 print(f"Filtered out")
