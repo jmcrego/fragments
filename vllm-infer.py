@@ -78,7 +78,7 @@ if __name__ == "__main__":
     parser.add_argument("-min_str_len", type=int, default=3, help="Minimum number of characters in a span.")
     args = parser.parse_args()    
 
-    BATCH_SIZE = 32
+    BATCH_SIZE = 64
     BASE_MODEL_PATH = "/lustre/fsmisc/dataset/HuggingFace_Models/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
 
     llm = load_vllm_model(BASE_MODEL_PATH)
@@ -93,7 +93,7 @@ if __name__ == "__main__":
             fdo.flush()
 
         samples, prompts = [], []
-        
+
         for sample in get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len):
 
             samples.append(sample)
