@@ -71,7 +71,7 @@ def spans_to_units(spans, source_tokens):
 # -----------------------------
 # Expand spans with gappy units
 # -----------------------------
-def merge_nearby_units(units, max_gap=6):
+def merge_gappy_units(units, max_gap=6):
     """
     Merge units if they are close enough.
     No gap tokens are inserted.
