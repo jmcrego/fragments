@@ -127,6 +127,10 @@ Rules:
 - Adapt the target span so that it would fit naturally when translating the input sentence (adjust morphology, determiners, or phrasing if needed).
 
 Stop generating immediately after </SPANS>.
+No explanations.
+No reasoning.
+No text outside the tags.
+The <ALIGNS> tag is already opened below, continue writing the alignments.
 
 --------------------------------
 Input
@@ -144,7 +148,12 @@ Example target:
 Overlapping spans:
 {spans}
 
-</think>"""
+--------------------------------
+Output
+--------------------------------
+
+<ALIGNS>
+"""
 
 def get_formatted_prompt(sample, prompt_num=1):
     if prompt_num == 1:
