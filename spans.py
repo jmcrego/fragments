@@ -81,17 +81,18 @@ if __name__ == "__main__":
 
     sp = splitPunctuation()
 
-    # text = "Hello, world! How's everything going?"
-    # tokens_with_offsets = sp(text)
+    text = "Hello, world! How's everything going?"
+    tokens_with_offsets = sp(text)
 
-    # for token, (start, end) in tokens_with_offsets:
-    #     print(f"{token} -> ({start}, {end})")
+    for token, (start, end) in tokens_with_offsets:
+        print(f"{token} -> ({start}, {end})")
 
-    # tokens = [token for token, _ in tokens_with_offsets]
-    # print(f"Split tokens: {tokens}")
+    tokens = [token for token, _ in tokens_with_offsets]
+    print(f"Split tokens: {tokens}")
 
-    # recovered = sp.join(text, tokens_with_offsets)
-    # print(f"Recovered text: {recovered}")
+    recovered = sp.join(text, tokens_with_offsets)
+    print(f"Recovered text: {recovered}")
+    sys.exit(0)
 
     n_output = 0
     with open(args.i) as fi, open(args.o) as fo, open(args.s) as fs, open(args.t) as ft:
@@ -114,10 +115,6 @@ if __name__ == "__main__":
                     print(f"T {idx}\t{' '.join(t_tokens)}") 
                     print(f"O {idx}\t{' '.join(o_tokens)}")
                     n_output += 1
-                else:
-                    sys.stderr.write(f"Skipping line {idx+1} no spans\n")
-            else:
-                sys.stderr.write(f"Skipping line {idx+1} empty line\n")
             idx += 1
             if args.stop_at and n_output >= args.stop_at:
                 break
