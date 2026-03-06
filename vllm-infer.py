@@ -74,6 +74,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", type=str, required=True, help="Source file.")
     parser.add_argument("-t", type=str, required=True, help="Target file.")
     parser.add_argument("-output_json", type=str, required=True, help="Output JSON file to store results.")
+    parser.add_argument("-prompt_num", type=int, default=1, help="Prompt number to use.")
     parser.add_argument("-model_path", type=str, default="/lustre/fsmisc/dataset/HuggingFace_Models/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", help="Path to the base model for vLLM.")
     parser.add_argument("-min_tok_len", type=int, default=1, help="Minimum number of tokens in a span.")
     parser.add_argument("-min_str_len", type=int, default=3, help="Minimum number of characters in a span.")
@@ -98,7 +99,7 @@ if __name__ == "__main__":
         for sample in get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len):
 
             samples.append(sample)
-            prompts.append(get_formatted_prompt(sample))
+            prompts.append(get_formatted_prompt(sample, prompt_num=args.prompt_num))
 
             if len(samples) == args.batch_size:
                 dump(samples, process_batch(llm, prompts))
