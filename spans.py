@@ -21,7 +21,15 @@ class splitPunctuation():
         return self.pretok.pre_tokenize_str(text)
 
     def join(self, text, tokens_with_offsets):
-        return " ".join(text[start:end] for _, (start, end) in tokens_with_offsets)
+        # Sort tokens by their start offset
+        tokens_with_offsets.sort(key=lambda x: x[1][0])  # Sort by start offset
+
+        # Reconstruct the text using the tokens and their offsets
+        reconstructed = []
+        for token, (start, end) in tokens_with_offsets:
+            reconstructed.append(text[start:end])  # Use original text slice to preserve punctuation
+
+        return ''.join(reconstructed)  # Join without adding extra spaces
 
 
 def get_overlapping_spans(
