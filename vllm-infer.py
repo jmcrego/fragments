@@ -5,7 +5,7 @@ import argparse
 from typing import List, Dict, Any, Union
 from vllm import LLM, SamplingParams
 from spans import get_spans_from_files
-from utils import read_josep_file, get_formatted_prompt
+from utils import get_formatted_prompt
 
 
 def load_vllm_model(base_model_path: str, **kwargs) -> LLM:
