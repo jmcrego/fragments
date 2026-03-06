@@ -90,10 +90,12 @@ if __name__ == "__main__":
     sp = splitPunctuation()
 
     text = "Hello, world! How's everything going?"
+    print(f"Original text: {text}")
+
     tokens_with_offsets = sp(text)
 
     for token, (start, end) in tokens_with_offsets:
-        print(f"{token} -> ({start}, {end})")
+        print(f"({start}, {end}) -> {token}")
 
     tokens = [token for token, _ in tokens_with_offsets]
     print(f"Split tokens: {tokens}")
