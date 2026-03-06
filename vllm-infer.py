@@ -21,7 +21,7 @@ def load_vllm_model(base_model_path: str, **kwargs) -> LLM:
 
 def generate(llm: LLM, 
              prompts: List[str], 
-             max_tokens: int = 1024, 
+             max_tokens: int = 256, 
              temperature: float = 0.7, 
              top_p: float = 0.9, 
              repetition_penalty: float = 1.1, 
