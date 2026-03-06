@@ -20,27 +20,6 @@ class splitPunctuation():
     def __call__(self, text):
         return self.pretok.pre_tokenize_str(text)
 
-    def join(self, text, tokens_with_offsets):
-
-        # Correct reconstruction
-        start = tokens_with_offsets[0][1][0]
-        end = tokens_with_offsets[-1][1][1]
-
-        recovered = text[start:end]
-
-        print("Recovered text:", recovered)
-
-
-        # Sort tokens by their start offset
-        tokens_with_offsets.sort(key=lambda x: x[1][0])  # Sort by start offset
-
-        # Reconstruct the text using the tokens and their offsets
-        reconstructed = []
-        for token, (start, end) in tokens_with_offsets:
-            reconstructed.append(text[start:end])  # Use original text slice to preserve punctuation
-
-        return ''.join(reconstructed)  # Join without adding extra spaces
-
 
 def get_overlapping_spans(
         input_tokens,
@@ -99,20 +78,17 @@ if __name__ == "__main__":
 
     sp = splitPunctuation()
 
-    text = "Hello, world! How's everything going?"
-    print(f"Original text: {text}")
+    # text = "Hello, world! How's everything going?"
+    # print(f"Original text: {text}")
 
-    tokens_with_offsets = sp(text)
+    # tokens_with_offsets = sp(text)
 
-    for token, (start, end) in tokens_with_offsets:
-        print(f"({start}, {end}) -> {token}")
+    # for token, (start, end) in tokens_with_offsets:
+    #     print(f"({start}, {end}) -> {token}")
 
-    tokens = [token for token, _ in tokens_with_offsets]
-    print(f"Split tokens: {tokens}")
+    # tokens = [token for token, _ in tokens_with_offsets]
+    # print(f"Split tokens: {tokens}")
 
-    recovered = sp.join(text, tokens_with_offsets)
-    print(f"Recovered text: {recovered}")
-    sys.exit(0)
 
     n_output = 0
     with open(args.i) as fi, open(args.o) as fo, open(args.s) as fs, open(args.t) as ft:
