@@ -152,6 +152,7 @@ Overlapping spans:
 Output
 --------------------------------
 
+</think>
 <ALIGNS>
 """
 
