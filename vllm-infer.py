@@ -92,7 +92,7 @@ if __name__ == "__main__":
                 fdo.write(json.dumps(samples[k], ensure_ascii=False) + "\n")
                 fdl.write(f"\n{'*'*10} BEGIN PROMPT {'*'*40}\n{prompts[k]}\n")
                 fdl.write(f"\n{'*'*10} BEGIN RESULT {'*'*40}\n{results[k]}\n")
-                fdl.write(f"\n{'*'*10} BEGIN SAMPLE {'*'*40}\n{samples[k]}\n")
+                fdl.write(f"\n{'*'*10} BEGIN PARSED {'*'*40}\n{json.dumps(samples[k], ensure_ascii=False, indent=2)}\n")
             fdo.flush()
             fdl.flush()
 
