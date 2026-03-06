@@ -57,14 +57,14 @@ def process_batch(llm, prompts):
     )
     return responses    
 
-def get_fragments(result):
-    fragments = []
+def get_pairs(result):
+    pairs = []
     for line in result.split('\n'):
         toks = line.split(' ||| ')
         if len(toks) == 2:
             s, t = toks[0], toks[1]
-            fragments.append((s.strip(), t.strip()))
-    return fragments
+            pairs.append((s.strip(), t.strip()))
+    return pairs
 
 
 if __name__ == "__main__":
@@ -74,23 +74,24 @@ if __name__ == "__main__":
     parser.add_argument("-s", type=str, required=True, help="Source file.")
     parser.add_argument("-t", type=str, required=True, help="Target file.")
     parser.add_argument("-output_json", type=str, required=True, help="Output JSON file to store results.")
+    parser.add_argument("-model_path", type=str, default="/lustre/fsmisc/dataset/HuggingFace_Models/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", help="Path to the base model for vLLM.")
     parser.add_argument("-min_tok_len", type=int, default=1, help="Minimum number of tokens in a span.")
     parser.add_argument("-min_str_len", type=int, default=3, help="Minimum number of characters in a span.")
+    parser.add_argument("-batch_size", type=int, default=64, help="Batch size for inference.")
     args = parser.parse_args()    
 
-    BATCH_SIZE = 64
-    BASE_MODEL_PATH = "/lustre/fsmisc/dataset/HuggingFace_Models/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+    llm = load_vllm_model(args.model_path)
 
-    llm = load_vllm_model(BASE_MODEL_PATH)
-
-    with open(args.output_json, 'w') as fdo:
+    with open(args.output_json, 'w') as fdo, open(args.output_json+'.log', 'w') as fdl:
 
         # dump into fdo a batch of samples with their generated pairs
         def dump(samples, results):
             for k in range(len(samples)):
-                samples[k]['pairs'] = get_fragments(results[k])
+                samples[k]['pairs'] = get_pairs(results[k])
                 fdo.write(json.dumps(samples[k], ensure_ascii=False) + "\n")
+                fdl.write(f"====== {samples[k]} ======\n------ {results[k]} ------\n")
             fdo.flush()
+            fdl.flush()
 
         samples, prompts = [], []
 
@@ -99,7 +100,7 @@ if __name__ == "__main__":
             samples.append(sample)
             prompts.append(get_formatted_prompt(sample))
 
-            if len(samples) == BATCH_SIZE:
+            if len(samples) == args.batch_size:
                 dump(samples, process_batch(llm, prompts))
                 samples, prompts = [], []
 
@@ -107,7 +108,6 @@ if __name__ == "__main__":
             dump(samples, process_batch(llm, prompts))
             samples, prompts = [], []
 
-    sys.stderr.write(f"Done\n")
 
 
     
