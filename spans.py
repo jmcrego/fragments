@@ -60,8 +60,11 @@ def get_spans_from_files(input_file, source_file, target_file, output_file, min_
             i_with_offsets = sp(i.strip())
             s_with_offsets = sp(s.strip())
             if len(i_with_offsets) and len(s_with_offsets) and len(o.strip()) and len(t.strip()):
+                print(f"idx: {idx}")
                 i_tokens = [token for token, _ in i_with_offsets]
                 s_tokens = [token for token, _ in s_with_offsets]
+                print(f"i_tokens: {i_tokens}")
+                print(f"s_tokens: {s_tokens}")
                 source_spans = get_overlapping_spans(i_tokens, s_tokens, min_tok_len=min_tok_len, min_str_len=min_str_len)
                 if len(source_spans):
                     yield {
