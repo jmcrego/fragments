@@ -156,49 +156,49 @@ Output
 prompt3 = """
 You are given:
 
-1) An input sentence to be translated.
-
-2) A translation example consisting of:
+1. An input sentence to be translated.
+2. A translation example consisting of:
    - Source sentence (example source)
    - Target sentence (its translation)
+3. A list of overlapping spans, each appearing in both the input sentence and the example source sentence.
 
-3) A list of overlapping spans that appear in BOTH:
-   - the input sentence
-   - the example source sentence
+Task:
+For each overlapping span, find the corresponding span in the example target sentence.
 
-Your task is to identify the target side spans in the example target sentence that correspond to the source side spans.
-Units may contain gaps (…) on either side, indicating missing words.
+Rules:
+- The target span must be the translation of the source span as it appears in the target sentence.
+- Spans may contain gaps written as (…), indicating omitted words.
+- Words translating the gap (…) must NOT appear in the target span. 
+- Use a gap (…) in the target span to indicate the corresponding omission.
 
-Output format:
+Output format (one line per span):
 source span ||| target span
+
+Additional rules:
+- Only process spans listed under "overlapping spans".
+- Do not invent new spans.
+- Preserve gaps (…) exactly as in the source span.
+- Do not include reasoning or explanations.
+- Stop generating after the last span.
 
 --------------------------------
 Example
 --------------------------------
 
 Input sentence:
-The committee has approved a new policy for protecting the environment
+The committee approved a policy on environmental issues and the new financial regulations
 
 Source sentence:
-The committee adopted a new policy on environmental protection
+The committee adopted a policy on environmental protection and financial regulations
 
 Target sentence:
-Le comité a adopté une nouvelle politique de protection de l'environnement
+Le comité a adopté une politique sur la protection de l'environnement et les régulations financières
 
 Overlapping spans:
-The committee (…) a new policy
+The committee (…) policy (…) financial regulations
 
 Output:
-The committee (…) a new policy ||| Le comité (…) une nouvelle politique
-
---------------------------------
-Additional Rules
---------------------------------
-
-- Do not include additional spans beyond those in the "Overlapping spans" list.
-- Do not output reasoning nor explanations.
-- Output only the list of units.
-- Stop generating immediately after the last unit.
+The committee (…) policy (…) financial regulations ||| Le comité (…) une politique (…) régulations financières
 
 --------------------------------
 Input
