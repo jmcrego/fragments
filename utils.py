@@ -195,6 +195,7 @@ The committee (…) a new policy ||| Le comité (…) une nouvelle politique
 Additional Rules
 --------------------------------
 
+- Do not include additional spans beyond those in the "Overlapping spans" list.
 - Do not output reasoning nor explanations.
 - Output only the list of units.
 - Stop generating immediately after the last unit.
