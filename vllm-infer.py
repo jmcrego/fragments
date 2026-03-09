@@ -77,8 +77,9 @@ if __name__ == "__main__":
     parser.add_argument("-model_path", type=str, default="/lustre/fsmisc/dataset/HuggingFace_Models/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", help="Path to the base model for vLLM.")
     parser.add_argument("-min_tok_len", type=int, default=1, help="Minimum number of tokens in a span.")
     parser.add_argument("-min_str_len", type=int, default=3, help="Minimum number of characters in a span.")
-    parser.add_argument("-batch_size", type=int, default=64, help="Batch size for inference.")
     parser.add_argument("-gap_str", type=str, default=None, help="String to use for representing gaps in the output. If not specified, no gaps will be used.")
+    parser.add_argument("-max_gap", type=int, default=4, help="Maximum gap size for merging units into gappy units (only used if gap_str is specified).")
+    parser.add_argument("-batch_size", type=int, default=64, help="Batch size for inference.")
     args = parser.parse_args()    
 
     if args.gap_str is not None:
@@ -103,7 +104,7 @@ if __name__ == "__main__":
 
         samples, prompts = [], []
 
-        for sample in get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len, gap_str=args.gap_str):
+        for sample in get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len, gap_str=args.gap_str, max_gap=args.max_gap):
 
             samples.append(sample)
             prompts.append(get_formatted_prompt(sample, prompt_num=args.prompt_num))

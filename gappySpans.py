@@ -154,8 +154,8 @@ def format_units(units):
     for u in units:
 
         parts = [
-            f"{idx}:{tok}"
-            for idx, tok in zip(u["indices"], u["tokens"])
+#            f"{idx}:{tok}" for idx, tok in zip(u["indices"], u["tokens"])
+            f"{{tok}" for idx, tok in zip(u["indices"], u["tokens"])
         ]
 
         lines.append(" ".join(parts))
