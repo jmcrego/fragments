@@ -186,7 +186,8 @@ def format_units_gaps(units, gap_str="..."):
             if gap > 1:
                 parts.append(gap_str)
 
-            parts.append(f"{curr_idx}:{token}")
+#            parts.append(f"{curr_idx}:{token}")
+            parts.append(f"{{token}")
 
         lines.append(" ".join(parts))
 
