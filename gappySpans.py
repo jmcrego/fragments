@@ -176,7 +176,8 @@ def format_units_gaps(units, gap_str="..."):
             continue
 
         # Start with first token
-        parts.append(f"{indices[0]}:{tokens[0]}")
+        # parts.append(f"{indices[0]}:{tokens[0]}")
+        parts.append(f"{tokens[0]}")
 
         for prev_idx, curr_idx, token in zip(indices, indices[1:], tokens[1:]):
 
