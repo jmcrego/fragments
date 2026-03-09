@@ -153,6 +153,86 @@ Output
 </think>
 """
 
+pormpt3 = """
+You are given:
+
+1) An input sentence to be translated.
+
+2) A translation example consisting of:
+   - Source sentence (example source)
+   - Target sentence (its translation)
+
+Your task is to identify translation units in the example that could help translate the input sentence.
+
+Each unit must consist of:
+- A source span from the example source sentence
+- Its corresponding translation span from the example target sentence
+
+The source span must match words that appear in both:
+- the input sentence
+- the example source sentence
+
+The target span must appear in the example target sentence.
+
+Output format:
+source span ||| target span
+
+Rules:
+- Prefer larger units over smaller ones.
+- If a span is fully contained inside a larger span, keep only the larger span.
+- Prefer spans that form meaningful translation units.
+- You may use units with gaps. Use <GAP> to indicate missing words on either side of the unit.
+
+--------------------------------
+Example
+--------------------------------
+
+Input sentence:
+Can you give me the money back, now?
+
+Source sentence:
+Could you give me my toy back now, please?
+
+Target sentence:
+Pourrais-tu me rendre mon jouet maintenant, s'il te plaît ?
+
+Output:
+
+give me <GAP> back ||| me rendre
+you ||| tu
+now ||| maintenant
+
+--------------------------------
+Additional Rules
+--------------------------------
+
+- Do not include spans containing only punctuation or determiners (e.g. "of the", "in the").
+- Do not include spans where the alignment is incorrect or unclear.
+- Adapt the target span so it fits naturally when translating the input sentence (adjust morphology or phrasing if necessary).
+- Do not output reasoning nor explanations.
+- Output only the list of units.
+- Stop generating immediately after the last unit.
+
+--------------------------------
+Input
+--------------------------------
+
+Input sentence:
+{input}
+
+Example source:
+{source}
+
+Example target:
+{target}
+
+--------------------------------
+Output
+--------------------------------
+
+</think>
+"""
+
 def get_formatted_prompt(sample, prompt_num=1):
     if prompt_num == 1:
         return prompt1.format(
