@@ -196,7 +196,12 @@ def format_units_gaps(units, gap_str="..."):
 # -----------------------------
 # Main Function
 # -----------------------------
-def get_spans_from_files(input_file, source_file, target_file, output_file, min_tok_len=1, min_str_len=3, max_gap=6, gap_str=None):
+
+def get_spans_from_files(input_file, source_file, target_file, output_file, **kwargs):
+    min_tok_len = kwargs.get("min_tok_len", 1)
+    min_str_len = kwargs.get("min_str_len", 3)
+    max_gap = kwargs.get("max_gap", 3)
+    gap_str = kwargs.get("gap_str", "")
     sp = splitPunctuation()
     with open(input_file, encoding="utf-8") as fi, open(output_file, encoding="utf-8") as fo, open(source_file, encoding="utf-8") as fs, open(target_file, encoding="utf-8") as ft:
         for idx, (i, o, s, t) in enumerate(zip(fi, fo, fs, ft)):
@@ -215,7 +220,7 @@ def get_spans_from_files(input_file, source_file, target_file, output_file, min_
                 units = build_gappy_units(units)
                 units = remove_contained(units)
                 units = remove_duplicate(units)
-                if gap_str is None:
+                if not gap_str:
                     units = format_units(units)
                 else:
                     units = format_units_gaps(units, gap_str=gap_str)

@@ -4,7 +4,6 @@ import json
 import argparse
 from typing import List, Dict, Any, Union
 from vllm import LLM, SamplingParams
-from spans import get_spans_from_files
 from utils import get_formatted_prompt
 
 
@@ -79,7 +78,13 @@ if __name__ == "__main__":
     parser.add_argument("-min_tok_len", type=int, default=1, help="Minimum number of tokens in a span.")
     parser.add_argument("-min_str_len", type=int, default=3, help="Minimum number of characters in a span.")
     parser.add_argument("-batch_size", type=int, default=64, help="Batch size for inference.")
+    parser.add_argument("-gap_str", type=str, default=None, help="String to use for representing gaps in the output. If not specified, no gaps will be used.")
     args = parser.parse_args()    
+
+    if args.gap_str is not None:
+        from gappySpans import get_spans_from_files
+    else:
+        from spans import get_spans_from_files
 
     llm = load_vllm_model(args.model_path)
 
@@ -98,7 +103,7 @@ if __name__ == "__main__":
 
         samples, prompts = [], []
 
-        for sample in get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len):
+        for sample in get_spans_from_files(args.i, args.s, args.t, args.o, min_tok_len=args.min_tok_len, min_str_len=args.min_str_len, gap_str=args.gap_str):
 
             samples.append(sample)
             prompts.append(get_formatted_prompt(sample, prompt_num=args.prompt_num))
