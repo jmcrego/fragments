@@ -213,6 +213,9 @@ Example source:
 Example target:
 {target}
 
+Overlapping spans:
+{spans}
+
 Output:
 </think>
 """
