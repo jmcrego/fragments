@@ -195,10 +195,10 @@ Target sentence:
 Le comité a adopté une politique sur la protection de l'environnement et les régulations financières
 
 Overlapping spans:
-The committee <GAP> policy <GAP> financial regulations
+The committee <GAP> a policy on environmental <GAP> and financial regulations
 
 Output:
-The committee <GAP> policy <GAP> financial regulations ||| Le comité <GAP> une politique <GAP> régulations financières
+The committee <GAP> a policy on environmental <GAP> and financial regulations ||| Le comité <GAP> une politique sur <GAP> de l'environnement et les régulations financières
 
 --------------------------------
 Input
