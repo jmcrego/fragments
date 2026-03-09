@@ -153,7 +153,7 @@ Output
 </think>
 """
 
-pormpt3 = """
+prompt3 = """
 You are given:
 
 1) An input sentence to be translated.
@@ -234,25 +234,11 @@ Output
 """
 
 def get_formatted_prompt(sample, prompt_num=1):
-    if prompt_num == 1:
-        return prompt1.format(
-            input=sample["input"],
-            source=sample["source"],
-            target=sample["target"],
-            spans='\n'.join(sample["spans"])
-        )
-    elif prompt_num == 2:
-        return prompt2.format(
-            input=sample["input"],
-            source=sample["source"],
-            target=sample["target"],
-            spans='\n'.join(sample["spans"])
-        )
-    elif prompt_num == 3:
-        return prompt3.format(
-            input=sample["input"],
-            source=sample["source"],
-            target=sample["target"],
-            spans='\n'.join(sample["spans"])
-        )
+    prompt = prompt1 if prompt_num == 1 else (prompt2 if prompt_num == 2 else prompt3)
+    return prompt.format(
+        input=sample["input"],
+        source=sample["source"],
+        target=sample["target"],
+        spans='\n'.join(sample["spans"])
+    )
 
