@@ -162,53 +162,39 @@ You are given:
    - Source sentence (example source)
    - Target sentence (its translation)
 
-Your task is to identify translation units in the example that could help translate the input sentence.
+3) A list of overlapping spans that appear in BOTH:
+   - the input sentence
+   - the example source sentence
 
-Each unit must consist of:
-- A source span from the example source sentence
-- Its corresponding translation span from the example target sentence
-
-The source span must match words that appear in both:
-- the input sentence
-- the example source sentence
-
-The target span must appear in the example target sentence.
+Your task is to identify the target side spans in the example target sentence that correspond to the source side spans.
+Units may contain gaps (…) on either side, indicating missing words.
 
 Output format:
 source span ||| target span
-
-Rules:
-- Prefer larger units over smaller ones.
-- If a span is fully contained inside a larger span, keep only the larger span.
-- Prefer spans that form meaningful translation units.
-- You may use units with gaps. Use <GAP> to indicate missing words on either side of the unit.
 
 --------------------------------
 Example
 --------------------------------
 
 Input sentence:
-Can you give me the money back, now?
+The committee has approved a new policy for protecting the environment
 
 Source sentence:
-Could you give me my toy back now, please?
+The committee adopted a new policy on environmental protection
 
 Target sentence:
-Pourrais-tu me rendre mon jouet maintenant, s'il te plaît ?
+Le comité a adopté une nouvelle politique de protection de l'environnement
+
+Overlapping spans:
+The committee (…) a new policy
 
 Output:
-
-give me <GAP> back ||| me rendre
-you ||| tu
-now ||| maintenant
+The committee (…) a new policy ||| Le comité (…) une nouvelle politique
 
 --------------------------------
 Additional Rules
 --------------------------------
 
-- Do not include spans containing only punctuation or determiners (e.g. "of the", "in the").
-- Do not include spans where the alignment is incorrect or unclear.
-- Adapt the target span so it fits naturally when translating the input sentence (adjust morphology or phrasing if necessary).
 - Do not output reasoning nor explanations.
 - Output only the list of units.
 - Stop generating immediately after the last unit.
@@ -226,10 +212,7 @@ Example source:
 Example target:
 {target}
 
---------------------------------
-Output
---------------------------------
-
+Output:
 </think>
 """
 
