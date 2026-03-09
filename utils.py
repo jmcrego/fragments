@@ -248,4 +248,11 @@ def get_formatted_prompt(sample, prompt_num=1):
             target=sample["target"],
             spans='\n'.join(sample["spans"])
         )
+    elif prompt_num == 3:
+        return prompt3.format(
+            input=sample["input"],
+            source=sample["source"],
+            target=sample["target"],
+            spans='\n'.join(sample["spans"])
+        )
 
