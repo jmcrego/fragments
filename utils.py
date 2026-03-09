@@ -167,9 +167,9 @@ For each overlapping span, find the corresponding span in the example target sen
 
 Rules:
 - The target span must be the translation of the source span as it appears in the target sentence.
-- Spans may contain gaps written as (…), indicating omitted words.
-- Words translating the gap (…) must NOT appear in the target span. 
-- Use a gap (…) in the target span to indicate the corresponding omission.
+- Spans may contain gaps written as "<GAP>", indicating omitted words.
+- Words translating the gap <GAP> must NOT appear in the target span. 
+- Use a gap <GAP> in the target span to indicate the corresponding omission.
 
 Output format (one line per span):
 source span ||| target span
@@ -177,7 +177,7 @@ source span ||| target span
 Additional rules:
 - Only process spans listed under "overlapping spans".
 - Do not invent new spans.
-- Preserve gaps (…) exactly as in the source span.
+- Preserve gaps <GAP> exactly as in the source span.
 - Do not include reasoning or explanations.
 - Stop generating after the last span.
 
@@ -195,10 +195,10 @@ Target sentence:
 Le comité a adopté une politique sur la protection de l'environnement et les régulations financières
 
 Overlapping spans:
-The committee (…) policy (…) financial regulations
+The committee <GAP> policy <GAP> financial regulations
 
 Output:
-The committee (…) policy (…) financial regulations ||| Le comité (…) une politique (…) régulations financières
+The committee <GAP> policy <GAP> financial regulations ||| Le comité <GAP> une politique <GAP> régulations financières
 
 --------------------------------
 Input
